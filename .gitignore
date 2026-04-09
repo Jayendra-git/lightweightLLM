@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+.streamlit/
+artifacts/
+rag/chroma/
+*.pyc
+*.pyo
+*.pyd
+

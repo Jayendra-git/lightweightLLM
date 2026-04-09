@@ -1,0 +1,25 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" rx="28" fill="#F4F1E8"/>
+  <rect x="36" y="32" width="1208" height="656" rx="24" fill="#FFFDF8" stroke="#D7CEBA" stroke-width="2"/>
+  <rect x="64" y="72" width="264" height="576" rx="22" fill="#19363A"/>
+  <text x="96" y="126" fill="#FFF8E8" font-family="Verdana" font-size="34" font-weight="700">PersonaTutor</text>
+  <text x="96" y="164" fill="#CFE1DA" font-family="Verdana" font-size="18">LoRA + RAG demo controls</text>
+  <rect x="96" y="208" width="200" height="52" rx="16" fill="#2A5052"/>
+  <text x="120" y="241" fill="#F6F2E8" font-family="Verdana" font-size="19">Backend: localhost</text>
+  <rect x="96" y="286" width="200" height="52" rx="16" fill="#2A5052"/>
+  <text x="120" y="319" fill="#F6F2E8" font-family="Verdana" font-size="19">Top K: 3 chunks</text>
+  <rect x="364" y="72" width="844" height="576" rx="24" fill="#FBF8EF" stroke="#DED4BE" stroke-width="2"/>
+  <text x="408" y="126" fill="#243639" font-family="Verdana" font-size="26" font-weight="700">Chat</text>
+  <rect x="404" y="164" width="758" height="96" rx="24" fill="#E9F0EC"/>
+  <text x="432" y="202" fill="#355055" font-family="Verdana" font-size="21" font-weight="700">User</text>
+  <text x="432" y="234" fill="#355055" font-family="Verdana" font-size="20">How does LoRA help with style tuning?</text>
+  <rect x="404" y="286" width="758" height="200" rx="24" fill="#F8F0DE"/>
+  <text x="432" y="324" fill="#5E4B2F" font-family="Verdana" font-size="21" font-weight="700">Assistant</text>
+  <text x="432" y="356" fill="#5E4B2F" font-family="Verdana" font-size="20">LoRA keeps the base model fixed and learns a lightweight adapter.</text>
+  <text x="432" y="388" fill="#5E4B2F" font-family="Verdana" font-size="20">That makes it a good fit for tone shifts, because you can preserve general</text>
+  <text x="432" y="420" fill="#5E4B2F" font-family="Verdana" font-size="20">capability while nudging how the model explains things.</text>
+  <text x="432" y="468" fill="#7C6746" font-family="Verdana" font-size="18">Sources: lora_basics.md, fine_tuning_workflow.md</text>
+  <rect x="404" y="516" width="758" height="88" rx="24" fill="#EEF2F4" stroke="#D1D9DE" stroke-width="2"/>
+  <text x="432" y="568" fill="#53656C" font-family="Verdana" font-size="20">Ask about LoRA, RAG, embeddings, or transformers...</text>
+</svg>
+
