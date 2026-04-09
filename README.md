@@ -1,28 +1,30 @@
-# LoRA Persona Chatbot with Mini RAG
+# Lightweight LLM Assistant: LoRA + RAG Demo
 
-A lightweight LLM assistant using LoRA fine-tuning for response style and RAG for document-grounded answers, with an end-to-end local chat interface.
+A lightweight end-to-end LLM project that demonstrates LoRA fine-tuning for response style adaptation and RAG for document-grounded question answering.
 
-## What this repo includes
+## Highlights
 
-- A synthetic style-tuning dataset with 144 instruction-response pairs in `train/data/style_pairs.jsonl`
-- A tiny local RAG corpus with hand-written markdown notes on LoRA, RAG, transformers, embeddings, quantization, and fine-tuning
-- A PEFT LoRA training script for a small instruct model
-- A Chroma-backed retrieval pipeline using sentence-transformer embeddings
-- A FastAPI backend and Streamlit frontend for local chat
+- LoRA fine-tuning on a small instruction dataset
+- RAG pipeline over a local document corpus
+- FastAPI backend for inference
+- Streamlit frontend for interactive chat
+- Modular project structure for training, retrieval, and serving
 
-
-This project intentionally keeps the demo narrow:
-
-- LoRA changes style, not factual knowledge
-- RAG supplies factual grounding from a tiny local corpus
-- The app shows answers plus retrieved sources
-- The default stack stays local and easy to reason about
-
-Default model choices:
+### Default model choices:
 
 - Base model: `Qwen/Qwen2.5-0.5B-Instruct`
 - Embedding model: `sentence-transformers/all-MiniLM-L6-v2`
 - Vector store: local Chroma persistence in `rag/chroma`
+
+## How chat works
+
+![Chat UI](assets/chat-ui-demo.png)
+
+1. The frontend sends the user question to FastAPI.
+2. The backend retrieves the top markdown chunks from Chroma.
+3. The prompt builder injects that context into a style-controlled chat prompt.
+4. The base model answers with the LoRA adapter loaded when available.
+5. The UI renders the answer and the source snippets used for retrieval.
 
 ## Quickstart
 
@@ -61,11 +63,3 @@ Run the frontend in another terminal:
 ```bash
 PYTHONPATH=. streamlit run app/frontend/streamlit_app.py
 ```
-
-## How chat works
-
-1. The frontend sends the user question to FastAPI.
-2. The backend retrieves the top markdown chunks from Chroma.
-3. The prompt builder injects that context into a style-controlled chat prompt.
-4. The base model answers with the LoRA adapter loaded when available.
-5. The UI renders the answer and the source snippets used for retrieval.

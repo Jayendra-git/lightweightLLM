@@ -16,7 +16,7 @@ class ChatRequest(BaseModel):
 class SourceChunk(BaseModel):
     source: str
     text: str
-    score: float
+    distance: float
 
 
 class ChatResponse(BaseModel):
@@ -42,4 +42,3 @@ def healthcheck() -> dict:
 def chat(request: ChatRequest) -> ChatResponse:
     result = get_service().answer(request.question, request.top_k)
     return ChatResponse(**result)
-

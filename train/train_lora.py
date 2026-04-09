@@ -7,7 +7,6 @@ import torch
 from datasets import load_dataset
 from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (
-    DataCollatorForLanguageModeling,
     Trainer,
     TrainingArguments,
 )
@@ -61,6 +60,44 @@ def format_example(messages: list[dict], tokenizer: AutoTokenizer) -> str:
     return "\n\n".join(turns)
 
 
+def format_prompt(messages: list[dict], tokenizer: AutoTokenizer) -> str:
+    prompt_messages = messages[:-1]
+    if hasattr(tokenizer, "apply_chat_template"):
+        return tokenizer.apply_chat_template(
+            prompt_messages,
+            tokenize=False,
+            add_generation_prompt=True,
+        )
+
+    turns = []
+    for message in prompt_messages:
+        turns.append(f"{message['role'].capitalize()}: {message['content']}")
+    turns.append("Assistant:")
+    return "\n\n".join(turns)
+
+
+class AssistantOnlyDataCollator:
+    def __init__(self, tokenizer: AutoTokenizer) -> None:
+        self.tokenizer = tokenizer
+
+    def __call__(self, features: list[dict]) -> dict[str, torch.Tensor]:
+        label_features = [{"input_ids": feature["labels"]} for feature in features]
+        batch_features = [
+            {
+                "input_ids": feature["input_ids"],
+                "attention_mask": feature["attention_mask"],
+            }
+            for feature in features
+        ]
+
+        batch = self.tokenizer.pad(batch_features, return_tensors="pt")
+        padded_labels = self.tokenizer.pad(label_features, return_tensors="pt")
+        labels = padded_labels["input_ids"]
+        labels = labels.masked_fill(labels == self.tokenizer.pad_token_id, -100)
+        batch["labels"] = labels
+        return batch
+
+
 def main() -> None:
     args = parse_args()
     output_dir = Path(args.output_dir)
@@ -86,21 +123,55 @@ def main() -> None:
     dataset = load_dataset("json", data_files=args.data_path, split="train")
 
     def tokenize_batch(batch: dict) -> dict:
-        texts = [format_example(messages, tokenizer) for messages in batch["messages"]]
-        return tokenizer(
-            texts,
-            truncation=True,
-            max_length=args.max_length,
-            padding=False,
-        )
+        input_ids = []
+        attention_masks = []
+        labels = []
+
+        for messages in batch["messages"]:
+            full_text = format_example(messages, tokenizer)
+            prompt_text = format_prompt(messages, tokenizer)
+
+            full_tokens = tokenizer(
+                full_text,
+                truncation=True,
+                max_length=args.max_length,
+                padding=False,
+                add_special_tokens=False,
+            )
+            prompt_tokens = tokenizer(
+                prompt_text,
+                truncation=True,
+                max_length=args.max_length,
+                padding=False,
+                add_special_tokens=False,
+            )
+
+            prompt_length = min(
+                len(prompt_tokens["input_ids"]),
+                len(full_tokens["input_ids"]),
+            )
+            masked_labels = [-100] * prompt_length + full_tokens["input_ids"][prompt_length:]
+
+            input_ids.append(full_tokens["input_ids"])
+            attention_masks.append(full_tokens["attention_mask"])
+            labels.append(masked_labels)
+
+        return {
+            "input_ids": input_ids,
+            "attention_mask": attention_masks,
+            "labels": labels,
+        }
 
     tokenized_dataset = dataset.map(
         tokenize_batch,
         batched=True,
         remove_columns=dataset.column_names,
     )
+    tokenized_dataset = tokenized_dataset.filter(
+        lambda example: any(label != -100 for label in example["labels"])
+    )
 
-    data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+    data_collator = AssistantOnlyDataCollator(tokenizer=tokenizer)
     training_args = TrainingArguments(
         output_dir=str(output_dir),
         per_device_train_batch_size=args.batch_size,

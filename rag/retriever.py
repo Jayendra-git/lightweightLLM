@@ -20,10 +20,14 @@ from rag.ingest import load_documents
 class RetrievedChunk:
     source: str
     text: str
-    score: float
+    distance: float
 
     def as_dict(self) -> dict:
-        return {"source": self.source, "text": self.text, "score": self.score}
+        return {
+            "source": self.source,
+            "text": self.text,
+            "distance": self.distance,
+        }
 
 
 class MiniRAGRetriever:
@@ -64,7 +68,7 @@ class MiniRAGRetriever:
                     RetrievedChunk(
                         source=metadata.get("source", "unknown"),
                         text=document,
-                        score=distance,
+                        distance=distance,
                     )
                 )
             return chunks
@@ -92,9 +96,9 @@ class MiniRAGRetriever:
                 RetrievedChunk(
                     source=doc["source"],
                     text=doc["text"],
-                    score=1 - similarity,
+                    distance=1 - similarity,
                 )
             )
 
-        scored.sort(key=lambda chunk: chunk.score)
+        scored.sort(key=lambda chunk: chunk.distance)
         return scored[:top_k]
